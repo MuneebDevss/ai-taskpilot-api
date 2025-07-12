@@ -29,7 +29,6 @@ coverage/
 .nyc_output
 
 # Dependency directories
-node_modules/
 jspm_packages/
 
 # TypeScript cache
@@ -56,9 +55,7 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-.env.test
+
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -104,10 +101,6 @@ firebase-debug.log
 firebase-debug.*.log
 .firebase/
 
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
 
 # Documentation
 docs/generated/

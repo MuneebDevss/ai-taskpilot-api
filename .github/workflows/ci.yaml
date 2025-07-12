@@ -45,35 +45,64 @@ jobs:
     environment: firebaseSecrets
     steps:
     - uses: actions/checkout@v3
-    - name: Create .env from GitHub Secrets
-      run: |
-        cat > .env << EOF
-        OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-        PORT=3000
-        FB_TYPE=service_account
-        FB_PROJECT_ID=${{ secrets.FB_PROJECT_ID }}
-        FB_PRIVATE_KEY_ID=${{ secrets.FB_PRIVATE_KEY_ID }}
-        FB_PRIVATE_KEY=\${{ secrets.FB_PRIVATE_KEY }}\
-        FB_CLIENT_EMAIL=${{ secrets.FB_CLIENT_EMAIL }}
-        FB_CLIENT_ID=${{ secrets.FB_CLIENT_ID }}
-        FB_AUTH_URI=${{ secrets.FB_AUTH_URI }}
-        FB_TOKEN_URI=${{ secrets.FB_TOKEN_URI }}
-        FB_AUTH_PROVIDER_CERT_URL=${{ secrets.FB_AUTH_PROVIDER_CERT_URL }}
-        FB_CLIENT_CERT_URL=${{ secrets.FB_CLIENT_CERT_URL }}
-        FB_UNIVERSE_DOMAIN=${{ secrets.FB_UNIVERSE_DOMAIN }}
-        NODE_ENV=development
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
-        JWT_EXPIRES_IN=24h
-        ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
-        LOG_LEVEL=info
-        EOF
+    
     - name: Build Docker image
       run: docker build -t ai-taskpilot-api .
-    - name: Test Docker Container
+    - name: Debug Environment Variables
       run: |
-        # Start container
-        docker run -d -p 3000:3000 --env-file .env --name test-container ai-taskpilot-api
+        echo "Checking environment variables..."
+        echo "FB_PROJECT_ID exists: ${{ secrets.FB_PROJECT_ID != '' }}"
+        echo "FB_CLIENT_EMAIL exists: ${{ secrets.FB_CLIENT_EMAIL != '' }}"
+        echo "FB_PRIVATE_KEY length: ${#FB_PRIVATE_KEY}"
+        echo "FB_PRIVATE_KEY starts with: $(echo "$FB_PRIVATE_KEY" | head -c 50)"
+      env:
+        FB_PRIVATE_KEY: ${{ secrets.FB_PRIVATE_KEY }}
+        FB_PROJECT_ID: ${{ secrets.FB_PROJECT_ID }}
+        FB_CLIENT_EMAIL: ${{ secrets.FB_CLIENT_EMAIL }}
+    - name: Test Docker Container
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        FB_TYPE: service_account
+        FB_PROJECT_ID: ${{ secrets.FB_PROJECT_ID }}
+        FB_PRIVATE_KEY_ID: ${{ secrets.FB_PRIVATE_KEY_ID }}
+        FB_PRIVATE_KEY: ${{ secrets.FB_PRIVATE_KEY }}
+        FB_CLIENT_EMAIL: ${{ secrets.FB_CLIENT_EMAIL }}
+        FB_CLIENT_ID: ${{ secrets.FB_CLIENT_ID }}
+        FB_AUTH_URI: ${{ secrets.FB_AUTH_URI }}
+        FB_TOKEN_URI: ${{ secrets.FB_TOKEN_URI }}
+        FB_AUTH_PROVIDER_CERT_URL: ${{ secrets.FB_AUTH_PROVIDER_CERT_URL }}
+        FB_CLIENT_CERT_URL: ${{ secrets.FB_CLIENT_CERT_URL }}
+        FB_UNIVERSE_DOMAIN: ${{ secrets.FB_UNIVERSE_DOMAIN }}
+        NODE_ENV: development
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        JWT_EXPIRES_IN: 24h
+        ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
+        LOG_LEVEL: info
+        PORT: 3000
+      run: |
+        # Start container with environment variables
+        docker run -d -p 3000:3000 \
+          -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
+          -e GEMINI_API_KEY="${GEMINI_API_KEY}" \
+          -e FB_TYPE="${FB_TYPE}" \
+          -e FB_PROJECT_ID="${FB_PROJECT_ID}" \
+          -e FB_PRIVATE_KEY_ID="${FB_PRIVATE_KEY_ID}" \
+          -e FB_PRIVATE_KEY="${FB_PRIVATE_KEY}" \
+          -e FB_CLIENT_EMAIL="${FB_CLIENT_EMAIL}" \
+          -e FB_CLIENT_ID="${FB_CLIENT_ID}" \
+          -e FB_AUTH_URI="${FB_AUTH_URI}" \
+          -e FB_TOKEN_URI="${FB_TOKEN_URI}" \
+          -e FB_AUTH_PROVIDER_CERT_URL="${FB_AUTH_PROVIDER_CERT_URL}" \
+          -e FB_CLIENT_CERT_URL="${FB_CLIENT_CERT_URL}" \
+          -e FB_UNIVERSE_DOMAIN="${FB_UNIVERSE_DOMAIN}" \
+          -e NODE_ENV="${NODE_ENV}" \
+          -e JWT_SECRET="${JWT_SECRET}" \
+          -e JWT_EXPIRES_IN="${JWT_EXPIRES_IN}" \
+          -e ALLOWED_ORIGINS="${ALLOWED_ORIGINS}" \
+          -e LOG_LEVEL="${LOG_LEVEL}" \
+          -e PORT="${PORT}" \
+          --name test-container ai-taskpilot-api
         
         # Wait for container to be ready with better error handling
         echo "Waiting for container to start..."
@@ -106,4 +135,3 @@ jobs:
       run: |
         docker stop test-container || true
         docker rm test-container || true
-        rm -f .env

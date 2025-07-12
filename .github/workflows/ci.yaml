@@ -1,0 +1,109 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: firebaseSecrets
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run linter
+      run: npm run lint
+    
+    - name: Run tests
+      run: npm run test:coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: firebaseSecrets
+    steps:
+    - uses: actions/checkout@v3
+    - name: Create .env from GitHub Secrets
+      run: |
+        cat > .env << EOF
+        OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+        PORT=3000
+        FB_TYPE=service_account
+        FB_PROJECT_ID=${{ secrets.FB_PROJECT_ID }}
+        FB_PRIVATE_KEY_ID=${{ secrets.FB_PRIVATE_KEY_ID }}
+        FB_PRIVATE_KEY=\${{ secrets.FB_PRIVATE_KEY }}\
+        FB_CLIENT_EMAIL=${{ secrets.FB_CLIENT_EMAIL }}
+        FB_CLIENT_ID=${{ secrets.FB_CLIENT_ID }}
+        FB_AUTH_URI=${{ secrets.FB_AUTH_URI }}
+        FB_TOKEN_URI=${{ secrets.FB_TOKEN_URI }}
+        FB_AUTH_PROVIDER_CERT_URL=${{ secrets.FB_AUTH_PROVIDER_CERT_URL }}
+        FB_CLIENT_CERT_URL=${{ secrets.FB_CLIENT_CERT_URL }}
+        FB_UNIVERSE_DOMAIN=${{ secrets.FB_UNIVERSE_DOMAIN }}
+        NODE_ENV=development
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        JWT_EXPIRES_IN=24h
+        ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
+        LOG_LEVEL=info
+        EOF
+    - name: Build Docker image
+      run: docker build -t ai-taskpilot-api .
+    - name: Test Docker Container
+      run: |
+        # Start container
+        docker run -d -p 3000:3000 --env-file .env --name test-container ai-taskpilot-api
+        
+        # Wait for container to be ready with better error handling
+        echo "Waiting for container to start..."
+        for i in {1..60}; do
+            if docker ps | grep test-container | grep -q "Up"; then
+                echo "Container is running, checking health..."
+                if curl -f --connect-timeout 5 --max-time 10 http://localhost:3000/health 2>/dev/null; then
+                    echo "✅ Health check passed"
+                    docker stop test-container
+                    docker rm test-container
+                    exit 0
+                fi
+            fi
+            echo "Attempt $i/60 - waiting 2 seconds..."
+            sleep 2
+        done
+        
+        # If we get here, something failed
+        echo "❌ Health check failed after 2 minutes"
+        echo "Container status:"
+        docker ps -a
+        echo "Container logs:"
+        docker logs test-container
+        docker stop test-container || true
+        docker rm test-container || true
+        exit 1
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        docker stop test-container || true
+        docker rm test-container || true
+        rm -f .env

@@ -1,4 +1,4 @@
-const ConversationRepository = require('../repositories/conversationRepository');
+import ConversationRepository  from '../repositories/conversationRepository.js';
 class ConversationService {
   constructor() {
     this.conversationRepository = new ConversationRepository();
@@ -12,5 +12,4 @@ class ConversationService {
     return await this.conversationRepository.create(conversationData);
   }
 }
-
-module.exports = ConversationService;
+export default ConversationService;

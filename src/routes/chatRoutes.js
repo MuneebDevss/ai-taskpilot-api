@@ -1,6 +1,6 @@
-const express = require('express');
-const ChatController = require('../controllers/chatController');
-const { validateChatMessage } = require('../middleware/validation');
+import express from 'express';
+import ChatController from '../controllers/chatController.js';
+import { validateChatMessage } from '../middleware/validation.js';
 
 const router = express.Router();
 const chatController = new ChatController();
@@ -11,4 +11,4 @@ router.post('/', validateChatMessage, chatController.processMessage.bind(chatCon
 // POST /api/chat/resolve-conflict - Resolve scheduling conflicts
 router.post('/resolve-conflict', chatController.resolveConflict.bind(chatController));
 
-module.exports = router;
+export default router;

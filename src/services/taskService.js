@@ -1,6 +1,5 @@
-const TaskRepository = require('../repositories/taskRepository');
-const ConflictService = require('./conflictService');
-
+import TaskRepository  from '../repositories/taskRepository.js';
+import ConflictService  from './conflictService.js';
 class TaskService {
   constructor() {
     this.taskRepository = new TaskRepository();
@@ -58,10 +57,10 @@ class TaskService {
 
   async findTaskByIdentifier(userId, identifier) {
     const tasks = await this.taskRepository.findByUserId(userId);
-    return tasks.find(task => 
-      task.id === identifier || 
+    return tasks.find(task =>
+      task.id === identifier ||
       task.title.toLowerCase().includes(identifier.toLowerCase())
     );
   }
 }
-module.exports = TaskService;
+export default TaskService;

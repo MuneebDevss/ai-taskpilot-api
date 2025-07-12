@@ -10,19 +10,19 @@ class Conversation {
 
   validate() {
     const errors = [];
-    
+
     if (!this.message.trim()) {
       errors.push('Message is required');
     }
-    
+
     if (!this.userId) {
       errors.push('User ID is required');
     }
-    
+
     if (!['user', 'assistant'].includes(this.type)) {
       errors.push('Invalid conversation type');
     }
-    
+
     return errors;
   }
 
@@ -37,5 +37,4 @@ class Conversation {
     };
   }
 }
-
-module.exports = Conversation;
+export default Conversation;

@@ -1,6 +1,7 @@
 {
   "name": "ai-task-manager",
   "version": "1.0.0",
+  "type": "module",
   "description": "AI-powered task management API with natural language processing",
   "main": "server.js",
   "scripts": {
@@ -40,8 +41,10 @@
     "winston": "^3.15.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.0",
     "@types/jest": "^29.5.14",
-    "eslint": "^9.14.0",
+    "babel-jest": "^30.0.4",
+    "eslint": "^9.31.0",
     "jest": "^30.0.4",
     "jsdoc": "^4.0.4",
     "nodemon": "^3.1.7",
@@ -63,8 +66,11 @@
       "lcov",
       "html"
     ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
     "testMatch": [
-      "**/tests/**/*.test.js"
+      "**/*.test.js"
     ]
   },
   "nodemonConfig": {

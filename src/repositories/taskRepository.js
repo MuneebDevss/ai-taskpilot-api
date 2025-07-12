@@ -1,5 +1,5 @@
-const database = require('../config/database');
-const Task = require('../models/Task');
+import database from '../config/database.js';
+import Task  from '../models/Task.js';
 
 class TaskRepository {
   constructor() {
@@ -49,7 +49,7 @@ class TaskRepository {
     try {
       const db = database.getDatabase();
       const task = new Task(taskData);
-      
+
       const validationErrors = task.validate();
       if (validationErrors.length > 0) {
         throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
@@ -57,7 +57,7 @@ class TaskRepository {
 
       const tasksRef = db.collection('users').doc(task.userId).collection(this.collectionName);
       const docRef = await tasksRef.add(task.toJSON());
-      
+
       task.id = docRef.id;
       return task;
     } catch (error) {
@@ -70,14 +70,14 @@ class TaskRepository {
     try {
       const db = database.getDatabase();
       const taskRef = db.collection('users').doc(userId).collection(this.collectionName).doc(taskId);
-      
+
       const updatedData = {
         ...updateData,
-        updated_at: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       };
 
       await taskRef.update(updatedData);
-      
+
       const updatedDoc = await taskRef.get();
       return new Task({ id: updatedDoc.id, ...updatedDoc.data() });
     } catch (error) {
@@ -99,4 +99,4 @@ class TaskRepository {
   }
 }
 
-module.exports = TaskRepository;
+export default TaskRepository;

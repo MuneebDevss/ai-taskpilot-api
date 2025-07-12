@@ -1,6 +1,5 @@
-const TaskService = require('../services/taskService');
-const { successResponse, errorResponse } = require('../utils/responseFormatter');
-
+import TaskService from '../services/taskService.js';
+import { successResponse, errorResponse } from '../utils/responseFormatter.js';
 class TaskController {
   constructor() {
     this.taskService = new TaskService();
@@ -10,7 +9,7 @@ class TaskController {
     try {
       const { userId = 'default' } = req.query;
       const tasks = await this.taskService.getAllTasks(userId);
-      
+
       res.json(successResponse(tasks, 'Tasks retrieved successfully'));
     } catch (error) {
       console.error('Get all tasks error:', error);
@@ -22,9 +21,9 @@ class TaskController {
     try {
       const { id } = req.params;
       const { userId = 'default' } = req.query;
-      
+
       const task = await this.taskService.getTaskById(userId, id);
-      
+
       res.json(successResponse(task, 'Task retrieved successfully'));
     } catch (error) {
       console.error('Get task by ID error:', error);
@@ -40,7 +39,7 @@ class TaskController {
       const updateData = req.body;
 
       const task = await this.taskService.updateTask(userId, id, updateData);
-      
+
       res.json(successResponse(task, 'Task updated successfully'));
     } catch (error) {
       console.error('Update task error:', error);
@@ -55,7 +54,7 @@ class TaskController {
       const { userId = 'default' } = req.query;
 
       await this.taskService.deleteTask(userId, id);
-      
+
       res.json(successResponse(null, 'Task deleted successfully'));
     } catch (error) {
       console.error('Delete task error:', error);
@@ -64,6 +63,4 @@ class TaskController {
     }
   }
 }
-
-module.exports = TaskController;
-
+export default TaskController;

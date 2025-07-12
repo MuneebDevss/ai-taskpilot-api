@@ -1,6 +1,5 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const config = require('./environment');
-
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import config from './environment.js';
 class GeminiClient {
   constructor() {
     this.client = null;
@@ -15,7 +14,6 @@ class GeminiClient {
       this.client = new GoogleGenerativeAI(config.gemini.apiKey);
       this.model = this.client.getGenerativeModel({ model: 'gemini-1.5-flash' });
       this.initialized = true;
-      console.log('✅ Gemini client initialized successfully');
       return this.model;
     } catch (error) {
       console.error('❌ Gemini initialization failed:', error);
@@ -30,5 +28,4 @@ class GeminiClient {
     return this.model;
   }
 }
-
-module.exports = new GeminiClient();
+export default GeminiClient;

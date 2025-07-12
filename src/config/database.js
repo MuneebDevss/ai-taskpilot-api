@@ -1,9 +1,7 @@
-
 // src/config/database.js
-const admin = require('firebase-admin');
-const { getFirestore } = require('firebase-admin/firestore');
-const config = require('./environment');
-
+import admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import config from './environment.js';
 class Database {
   constructor() {
     this.db = null;
@@ -20,14 +18,12 @@ class Database {
 
       this.db = getFirestore();
       this.initialized = true;
-      console.log('✅ Database initialized successfully');
       return this.db;
     } catch (error) {
       console.error('❌ Database initialization failed:', error);
       throw error;
     }
   }
-
   getDatabase() {
     if (!this.initialized) {
       throw new Error('Database not initialized. Call initialize() first.');
@@ -35,5 +31,4 @@ class Database {
     return this.db;
   }
 }
-
-module.exports = new Database();
+export default Database;

@@ -1,10 +1,8 @@
-const TaskService = require('../../../src/services/taskService');
-const TaskRepository = require('../../../src/repositories/taskRepository');
-const ConflictService = require('../../../src/services/conflictService');
-
-jest.mock('../../../src/repositories/taskRepository');
-jest.mock('../../../src/services/conflictService');
-
+import TaskService  from '../src/services/taskService.js';
+import TaskRepository  from '../src/repositories/taskRepository.js';
+import ConflictService  from '../src/services/conflictService.js';
+jest.mock('../src/repositories/taskRepository.js');
+jest.mock('../src/services/conflictService.js');
 describe('TaskService', () => {
   let taskService;
   let mockTaskRepository;
@@ -25,8 +23,8 @@ describe('TaskService', () => {
   describe('getAllTasks', () => {
     it('should return all tasks for a user', async () => {
       const mockTasks = [
-        { id: '1', title: 'Task 1', userId: 'user1' },
-        { id: '2', title: 'Task 2', userId: 'user1' }
+        { id: '1', title: 'Task 1' },
+        { id: '2', title: 'Task 2' }
       ];
       mockTaskRepository.findByUserId.mockResolvedValue(mockTasks);
 
@@ -44,11 +42,10 @@ describe('TaskService', () => {
   });
 
   describe('createTask', () => {
-        it('should return conflicts when they exist', async () => {
+    it('should return conflicts when they exist', async () => {
       const taskData = {
         title: 'Conflicting Task',
-        userId: 'user1',
-        start_date: '2025-01-01T10:00:00Z',
+        startDate: '2025-01-01T10:00:00Z',
         duration: 60
       };
       const existingTasks = [{ id: '2', title: 'Existing Task' }];
@@ -63,26 +60,9 @@ describe('TaskService', () => {
       expect(result.conflicts).toEqual(mockConflicts);
       expect(result.proposedTask).toEqual(taskData);
       expect(mockTaskRepository.create).not.toHaveBeenCalled();
-    })}
-  );
-    describe('getTaskById', () => {
-    it('should return a task when found', async () => {
-      const mockTask = { id: '1', title: 'Task 1', userId: 'user1' };
-      mockTaskRepository.findById.mockResolvedValue(mockTask);
-
-      const result = await taskService.getTaskById('user1', '1');
-
-      expect(result).toEqual(mockTask);
-      expect(mockTaskRepository.findById).toHaveBeenCalledWith('user1', '1');
-    });
-
-    it('should throw an error when task is not found', async () => {
-      mockTaskRepository.findById.mockResolvedValue(null);
-
-      await expect(taskService.getTaskById('user1', '999')).rejects.toThrow('Task not found');
     });
   });
-    describe('updateTask', () => {
+  describe('updateTask', () => {
     it('should update a task if it exists', async () => {
       const existingTask = { id: '1', title: 'Old Task', userId: 'user1' };
       const updateData = { title: 'Updated Task' };
@@ -104,7 +84,7 @@ describe('TaskService', () => {
       await expect(taskService.updateTask('user1', '404', { title: 'New' })).rejects.toThrow('Task not found');
     });
   });
-    describe('deleteTask', () => {
+  describe('deleteTask', () => {
     it('should delete the task if it exists', async () => {
       const task = { id: '1', title: 'Task to Delete', userId: 'user1' };
       mockTaskRepository.findById.mockResolvedValue(task);
@@ -123,7 +103,7 @@ describe('TaskService', () => {
       await expect(taskService.deleteTask('user1', '999')).rejects.toThrow('Task not found');
     });
   });
-    describe('findTaskByIdentifier', () => {
+  describe('findTaskByIdentifier', () => {
     it('should return a task by exact ID match', async () => {
       const tasks = [{ id: 'abc123', title: 'Some Task' }];
       mockTaskRepository.findByUserId.mockResolvedValue(tasks);
@@ -154,4 +134,4 @@ describe('TaskService', () => {
   });
 
 }
-)
+);

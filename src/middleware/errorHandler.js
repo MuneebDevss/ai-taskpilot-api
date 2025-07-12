@@ -1,7 +1,7 @@
-const { errorResponse } = require('../utils/responseFormatter');
-const logger = require('../utils/logger');
+import { errorResponse } from '../utils/responseFormatter.js';
+import logger from '../utils/logger.js';
 
-const errorHandler = (err, req, res, next) => {
+export const  errorHandler = (err, req, res) => {
   logger.error('Error occurred:', {
     error: err.message,
     stack: err.stack,
@@ -36,11 +36,7 @@ const errorHandler = (err, req, res, next) => {
   res.status(statusCode).json(errorResponse(message, process.env.NODE_ENV === 'development' ? err.stack : null));
 };
 
-const notFoundHandler = (req, res) => {
+export const notFoundHandler = (req, res) => {
   res.status(404).json(errorResponse(`Route ${req.originalUrl} not found`));
 };
 
-module.exports = {
-  errorHandler,
-  notFoundHandler
-};

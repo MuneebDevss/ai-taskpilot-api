@@ -1,5 +1,5 @@
-const geminiClient = require('../config/gemini');
-class AIService {
+import geminiClient from '../config/gemini.js';
+export class AIService {
   constructor() {
     this.systemPrompt = `You are an intelligent task management assistant. Your job is to:
 
@@ -32,22 +32,22 @@ Priorities: Low, Medium, High, Urgent`;
   async parseUserInput(userMessage, existingTasks = []) {
     try {
       const model = geminiClient.getModel();
-      
+
       const taskContext = existingTasks.length > 0
         ? `\n\nExisting tasks for context:\n${JSON.stringify(existingTasks.slice(-5), null, 2)}`
         : '';
 
       const chat = model.startChat({
         history: [],
-        generationConfig: { temperature: 0.7 },
+        generationConfig: { temperature: 0.7 }
       });
 
       const result = await chat.sendMessage(this.systemPrompt + taskContext + `\n\nUser: ${userMessage}`);
-      
+
       let responseText = result.response.text().trim();
 
       // Clean up response format
-      if (responseText.startsWith("```")) {
+      if (responseText.startsWith('```')) {
         responseText = responseText.replace(/```(?:json)?/, '').replace(/```$/, '').trim();
       }
 
@@ -55,12 +55,11 @@ Priorities: Low, Medium, High, Urgent`;
     } catch (error) {
       console.error('AI Service Error:', error);
       return {
-        action: "error",
-        message: "I'm having trouble processing your request. Could you try rephrasing it?",
-        suggestions: ["Try being more specific about the task", "Include date and time details"]
+        action: 'error',
+        message: 'I\'m having trouble processing your request. Could you try rephrasing it?',
+        suggestions: ['Try being more specific about the task', 'Include date and time details']
       };
     }
   }
 }
-
-module.exports = AIService;
+export default AIService;

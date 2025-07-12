@@ -1,9 +1,8 @@
-const AIService = require('../services/aiService');
-const TaskService = require('../services/taskService');
-const ConversationService = require('../services/conversationService');
-const ConflictService = require('../services/conflictService');
-const { successResponse, errorResponse } = require('../utils/responseFormatter');
-
+import AIService from '../services/aiService.js';
+import TaskService from '../services/taskService.js';
+import ConversationService from '../services/conversationService.js';
+import ConflictService from '../services/conflictService.js';
+import { successResponse, errorResponse } from '../utils/responseFormatter.js';
 class ChatController {
   constructor() {
     this.aiService = new AIService();
@@ -29,7 +28,7 @@ class ChatController {
 
       // Get existing tasks for context
       const existingTasks = await this.taskService.getAllTasks(userId);
-      
+
       // Process with AI
       const aiResponse = await this.aiService.parseUserInput(message, existingTasks);
       let responseData = { ...aiResponse };
@@ -50,31 +49,32 @@ class ChatController {
 
           responseData = {
             action: 'conflict_resolution',
-            message: `I found a scheduling conflict! You have "${result.conflicts[0].title}" at that time. Would you like me to suggest alternative times?`,
+            message: `I found a scheduling conflict! You have "${result.conflicts[0].title}" at 
+            that time. Would you like me to suggest alternative times?`,
             conflicts: result.conflicts,
-            proposed_task: result.proposedTask,
+            proposedTask: result.proposedTask,
             suggestions: suggestions.map(s => s.description)
           };
         } else {
-          responseData.task_created = result.task;
+          responseData.taskTreated = result.task;
         }
       }
 
       if (aiResponse.action === 'update_task') {
         const task = await this.taskService.findTaskByIdentifier(
-          userId, 
+          userId,
           aiResponse.task_id || aiResponse.task_identifier
         );
 
         if (task) {
           const updatedTask = await this.taskService.updateTask(
-            userId, 
-            task.id, 
+            userId,
+            task.id,
             aiResponse.task_data
           );
-          responseData.task_updated = updatedTask;
+          responseData.taskUpdated = updatedTask;
         } else {
-          responseData.message = "I couldn't find the task you're referring to. Could you be more specific?";
+          responseData.message = 'I couldn\'t find the task you\'re referring to. Could you be more specific?';
         }
       }
 
@@ -96,7 +96,8 @@ class ChatController {
 
   async resolveConflict(req, res) {
     try {
-      const { action, taskId, newTime, userId = 'default' } = req.body;
+      // const { action, taskId, newTime, userId = 'default' } = req.body;
+      const { action } = req.body;
 
       // Implementation depends on the specific conflict resolution logic
       // This is a placeholder for the actual implementation
@@ -111,5 +112,4 @@ class ChatController {
     }
   }
 }
-
-module.exports = ChatController;
+export default ChatController;

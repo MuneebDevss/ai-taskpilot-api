@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const { errorResponse } = require('../utils/responseFormatter');
+import jwt from 'jsonwebtoken';
+import { errorResponse } from '../utils/responseFormatter.js';
 
-const authenticateToken = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -18,7 +18,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-const optionalAuth = (req, res, next) => {
+export const optionalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -30,9 +30,4 @@ const optionalAuth = (req, res, next) => {
     });
   }
   next();
-};
-
-module.exports = {
-  authenticateToken,
-  optionalAuth
 };

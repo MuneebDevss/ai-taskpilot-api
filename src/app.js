@@ -1,24 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 
-// Import routes
-const taskRoutes = require('./routes/taskRoutes');
-const chatRoutes = require('./routes/chatRoutes');
-const conversationRoutes = require('./routes/conversationRoutes');
+import taskRoutes from './routes/taskRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
+import conversationRoutes from './routes/conversationRoutes.js';
 
-// Import middleware
-const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
-const { optionalAuth } = require('./middleware/authentication');
-
-// Import configurations
-const database = require('./config/database');
-const geminiClient = require('./config/gemini');
-const config = require('./config/environment');
-const logger = require('./utils/logger');
-
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { optionalAuth } from './middleware/authentication.js';
+import config from './config/environment.js';
+import logger from './utils/logger.js';
+import GeminiClient from './config/gemini.js';
+import Database from './config/database.js';
+const geminiClient = new GeminiClient();
+const database = new Database();
 class App {
   constructor() {
     this.app = express();
@@ -28,34 +25,27 @@ class App {
   }
 
   setupMiddleware() {
-    // Security middleware
     this.app.use(helmet());
     this.app.use(cors({
       origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
       credentials: true
     }));
 
-    // Rate limiting
     const limiter = rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
+      windowMs: 15 * 60 * 1000,
+      max: 100,
       message: 'Too many requests from this IP, please try again later.',
       standardHeaders: true,
-      legacyHeaders: false,
+      legacyHeaders: false
     });
     this.app.use('/api/', limiter);
 
-    // Body parsing
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-    // Compression
     this.app.use(compression());
-
-    // Optional authentication
     this.app.use(optionalAuth);
 
-    // Request logging
     this.app.use((req, res, next) => {
       logger.info(`${req.method} ${req.path}`, {
         ip: req.ip,
@@ -67,7 +57,6 @@ class App {
   }
 
   setupRoutes() {
-    // Health check
     this.app.get('/health', (req, res) => {
       res.json({
         status: 'OK',
@@ -77,12 +66,10 @@ class App {
       });
     });
 
-    // API routes
     this.app.use('/api/tasks', taskRoutes);
     this.app.use('/api/chat', chatRoutes);
     this.app.use('/api/conversations', conversationRoutes);
 
-    // API documentation
     this.app.get('/api', (req, res) => {
       res.json({
         name: 'AI Task Manager API',
@@ -102,21 +89,14 @@ class App {
   }
 
   setupErrorHandling() {
-    // 404 handler
     this.app.use(notFoundHandler);
-
-    // Global error handler
     this.app.use(errorHandler);
   }
 
   async initialize() {
     try {
-      // Initialize database
       await database.initialize();
-      
-      // Initialize Gemini client
       geminiClient.initialize();
-      
       logger.info('Application initialized successfully');
     } catch (error) {
       logger.error('Failed to initialize application:', error);
@@ -129,4 +109,4 @@ class App {
   }
 }
 
-module.exports = App;
+export default App;

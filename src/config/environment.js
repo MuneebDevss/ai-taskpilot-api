@@ -1,5 +1,6 @@
-require('dotenv').config();
-
+import dotenv from 'dotenv';
+dotenv.config();
+/* eslint-disable camelcase */
 const config = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -19,5 +20,4 @@ const config = {
     client_x509_cert_url: process.env.FB_CLIENT_CERT_URL
   }
 };
-
-module.exports = config;
+export default config;

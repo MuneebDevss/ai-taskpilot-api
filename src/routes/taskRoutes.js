@@ -1,6 +1,10 @@
-const express = require('express');
-const TaskController = require('../controllers/taskController');
-const { validateUserId, validateTaskId, validateTaskUpdate } = require('../middleware/validation');
+import express from 'express';
+import TaskController from '../controllers/taskController.js';
+import {
+  validateUserId,
+  validateTaskId,
+  validateTaskUpdate
+} from '../middleware/validation.js';
 
 const router = express.Router();
 const taskController = new TaskController();
@@ -17,4 +21,4 @@ router.put('/:id', validateTaskId, validateUserId, validateTaskUpdate, taskContr
 // DELETE /api/tasks/:id - Delete a task
 router.delete('/:id', validateTaskId, validateUserId, taskController.deleteTask.bind(taskController));
 
-module.exports = router;
+export default router;

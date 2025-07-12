@@ -25,7 +25,7 @@ class ConflictService {
   suggestAlternativeTimes(originalTime, duration, existingTasks) {
     const suggestions = [];
     const baseTime = new Date(originalTime);
-    
+
     // Suggest times: 1 hour before, 1 hour after, next day same time
     const alternatives = [
       new Date(baseTime.getTime() - 60 * 60 * 1000), // 1 hour before
@@ -34,9 +34,9 @@ class ConflictService {
     ];
 
     alternatives.forEach(altTime => {
-      const mockTask = { start_date: altTime.toISOString(), duration };
+      const mockTask = { startDate: altTime.toISOString(), duration };
       const conflicts = this.findTimeConflicts(mockTask, existingTasks);
-      
+
       if (conflicts.length === 0) {
         suggestions.push({
           time: altTime.toISOString(),
@@ -50,16 +50,15 @@ class ConflictService {
 
   formatTimeDescription(newTime, originalTime) {
     const diffHours = Math.abs(newTime - originalTime) / (1000 * 60 * 60);
-    
+
     if (diffHours < 24) {
-      return diffHours === 1 ? 
-        (newTime > originalTime ? "1 hour later" : "1 hour earlier") :
-        `${Math.round(diffHours)} hours ${newTime > originalTime ? "later" : "earlier"}`;
+      return diffHours === 1 ?
+        (newTime > originalTime ? '1 hour later' : '1 hour earlier') :
+        `${Math.round(diffHours)} hours ${newTime > originalTime ? 'later' : 'earlier'}`;
     } else {
       const diffDays = Math.round(diffHours / 24);
       return `${diffDays} day${diffDays > 1 ? 's' : ''} later`;
     }
   }
 }
-
-module.exports = ConflictService;
+export default ConflictService;

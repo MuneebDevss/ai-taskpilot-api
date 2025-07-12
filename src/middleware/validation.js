@@ -1,7 +1,7 @@
-const { body, query, param, validationResult } = require('express-validator');
-const { errorResponse } = require('../utils/responseFormatter');
+import { body, query, param, validationResult } from 'express-validator';
+import { errorResponse } from '../utils/responseFormatter.js';
 
-const handleValidationErrors = (req, res, next) => {
+export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json(errorResponse('Validation failed', errors.array()));
@@ -9,7 +9,7 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-const validateChatMessage = [
+export const validateChatMessage = [
   body('message')
     .trim()
     .notEmpty()
@@ -24,7 +24,7 @@ const validateChatMessage = [
   handleValidationErrors
 ];
 
-const validateTaskUpdate = [
+export const validateTaskUpdate = [
   body('title')
     .optional()
     .trim()
@@ -50,7 +50,7 @@ const validateTaskUpdate = [
   handleValidationErrors
 ];
 
-const validateUserId = [
+export const validateUserId = [
   query('userId')
     .optional()
     .trim()
@@ -59,18 +59,10 @@ const validateUserId = [
   handleValidationErrors
 ];
 
-const validateTaskId = [
+export const validateTaskId = [
   param('id')
     .trim()
     .notEmpty()
     .withMessage('Task ID is required'),
   handleValidationErrors
 ];
-
-module.exports = {
-  validateChatMessage,
-  validateTaskUpdate,
-  validateUserId,
-  validateTaskId,
-  handleValidationErrors
-};

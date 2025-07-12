@@ -1,6 +1,6 @@
 // eslint.config.js
 
-import js from '@eslint/js';
+
 
 export default [
   {
@@ -16,7 +16,10 @@ export default [
         jest: true
       }
     },
-    plugins: [],
+    plugins: {
+
+    }
+    ,
     rules: {
       indent: ['error', 2],
       'linebreak-style': ['error', 'unix'],

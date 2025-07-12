@@ -1,6 +1,6 @@
-const database = require('../config/database');
-const Conversation = require('../models/Conversation');
-class ConversationRepository {
+import database from '../config/database.js';
+import Conversation from '../models/Conversation.js';
+export class ConversationRepository {
   constructor() {
     this.collectionName = 'conversations';
   }
@@ -27,7 +27,7 @@ class ConversationRepository {
     try {
       const db = database.getDatabase();
       const conversation = new Conversation(conversationData);
-      
+
       const validationErrors = conversation.validate();
       if (validationErrors.length > 0) {
         throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
@@ -35,7 +35,7 @@ class ConversationRepository {
 
       const conversationsRef = db.collection('users').doc(conversation.userId).collection(this.collectionName);
       const docRef = await conversationsRef.add(conversation.toJSON());
-      
+
       conversation.id = docRef.id;
       return conversation;
     } catch (error) {
@@ -44,4 +44,4 @@ class ConversationRepository {
     }
   }
 }
-module.exports = ConversationRepository;
+export default ConversationRepository;

@@ -1,6 +1,6 @@
-import TaskService  from '../src/services/taskService.js';
-import TaskRepository  from '../src/repositories/taskRepository.js';
-import ConflictService  from '../src/services/conflictService.js';
+import TaskService  from '../../src/services/taskService.js';
+import TaskRepository  from '../../src/repositories/taskRepository.js';
+import ConflictService  from '../../src/services/conflictService.js';
 jest.mock('../src/repositories/taskRepository.js');
 jest.mock('../src/services/conflictService.js');
 describe('TaskService', () => {

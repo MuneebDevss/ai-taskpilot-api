@@ -1,5 +1,6 @@
-import database from '../config/database.js';
+import Database from '../config/database.js';
 import Conversation from '../models/Conversation.js';
+const database = Database.getInstance();
 export class ConversationRepository {
   constructor() {
     this.collectionName = 'conversations';
@@ -7,7 +8,7 @@ export class ConversationRepository {
 
   async findByUserId(userId) {
     try {
-      const db = database.getDatabase();
+      const db = await database.initialize();
       const conversationsRef = db.collection('users').doc(userId).collection(this.collectionName);
       const snapshot = await conversationsRef.orderBy('timestamp', 'desc').limit(50).get();
 
@@ -25,7 +26,7 @@ export class ConversationRepository {
 
   async create(conversationData) {
     try {
-      const db = database.getDatabase();
+      const db = await database.initialize();
       const conversation = new Conversation(conversationData);
 
       const validationErrors = conversation.validate();

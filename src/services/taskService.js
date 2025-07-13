@@ -1,5 +1,7 @@
 import TaskRepository  from '../repositories/taskRepository.js';
 import ConflictService  from './conflictService.js';
+import Database from '../config/database.js';
+import Task from '../models/Task.js';
 class TaskService {
   constructor() {
     this.taskRepository = new TaskRepository();
@@ -18,26 +20,33 @@ class TaskService {
     return task;
   }
 
-  async createTask(taskData) {
-    const existingTasks = await this.taskRepository.findByUserId(taskData.userId);
-    const conflicts = this.conflictService.findTimeConflicts(taskData, existingTasks);
+  async create(taskData) {
+    try {
+      const db = await Database.getInstance().initialize();
+      const task = new Task(taskData);
 
-    if (conflicts.length > 0) {
+      const validationErrors = task.validate();
+      if (validationErrors.length > 0) {
+        throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
+      }
+
+      const tasksRef = db.collection('users').doc(task.userId).collection(this.collectionName);
+      const taskJson = task.toJSON();
+      const docRef = await tasksRef.add(taskJson);
+
+      // Return plain object, not Task instance
       return {
-        hasConflicts: true,
-        conflicts,
-        proposedTask: taskData
+        ...taskJson,
+        id: docRef.id
       };
+    } catch (error) {
+      console.error('Error creating task:', error);
+      throw error;
     }
-
-    const task = await this.taskRepository.create(taskData);
-    return {
-      hasConflicts: false,
-      task
-    };
   }
 
   async updateTask(userId, taskId, updateData) {
+    print(taskId);
     const existingTask = await this.taskRepository.findById(userId, taskId);
     if (!existingTask) {
       throw new Error('Task not found');

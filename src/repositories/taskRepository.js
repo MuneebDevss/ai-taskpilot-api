@@ -1,4 +1,4 @@
-import database from '../config/database.js';
+import Database from '../config/database.js';
 import Task  from '../models/Task.js';
 
 class TaskRepository {
@@ -8,7 +8,8 @@ class TaskRepository {
 
   async findByUserId(userId) {
     try {
-      const db = database.getDatabase();
+      console.log(userId);
+      const db = await Database.getInstance().initialize();
       const tasksRef = db.collection('users').doc(userId).collection(this.collectionName);
       const snapshot = await tasksRef.get();
 
@@ -30,7 +31,7 @@ class TaskRepository {
 
   async findById(userId, taskId) {
     try {
-      const db = database.getDatabase();
+      const db = await Database.getInstance().initialize();
       const taskRef = db.collection('users').doc(userId).collection(this.collectionName).doc(taskId);
       const doc = await taskRef.get();
 
@@ -47,7 +48,7 @@ class TaskRepository {
 
   async create(taskData) {
     try {
-      const db = database.getDatabase();
+      const db = await Database.getInstance().initialize();
       const task = new Task(taskData);
 
       const validationErrors = task.validate();
@@ -68,7 +69,7 @@ class TaskRepository {
 
   async update(userId, taskId, updateData) {
     try {
-      const db = database.getDatabase();
+      const db = await Database.getInstance().initialize();
       const taskRef = db.collection('users').doc(userId).collection(this.collectionName).doc(taskId);
 
       const updatedData = {
@@ -88,7 +89,7 @@ class TaskRepository {
 
   async delete(userId, taskId) {
     try {
-      const db = database.getDatabase();
+      const db = await Database.getInstance().initialize();
       const taskRef = db.collection('users').doc(userId).collection(this.collectionName).doc(taskId);
       await taskRef.delete();
       return true;

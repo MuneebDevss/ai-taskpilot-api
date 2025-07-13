@@ -14,8 +14,8 @@ import config from './config/environment.js';
 import logger from './utils/logger.js';
 import GeminiClient from './config/gemini.js';
 import Database from './config/database.js';
-const geminiClient = new GeminiClient();
-const database = new Database();
+const geminiClient = GeminiClient.getInstance();
+const database = Database.getInstance();
 class App {
   constructor() {
     this.app = express();

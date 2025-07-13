@@ -2,6 +2,7 @@ import AIService from '../services/aiService.js';
 import TaskService from '../services/taskService.js';
 import ConversationService from '../services/conversationService.js';
 import ConflictService from '../services/conflictService.js';
+import Task from '../models/Task.js';
 import { successResponse, errorResponse } from '../utils/responseFormatter.js';
 class ChatController {
   constructor() {
@@ -31,34 +32,39 @@ class ChatController {
 
       // Process with AI
       const aiResponse = await this.aiService.parseUserInput(message, existingTasks);
-      let responseData = { ...aiResponse };
+      const responseData = { ...aiResponse.taskData };
+      //improve tasks
+      if (!responseData || !Array.isArray(responseData)) {
+        aiResponse.taskData = await this.aiService.improveTasks(aiResponse.taskData);
+      }
 
       // Handle different actions
-      if (aiResponse.action === 'create_task' && aiResponse.task_data) {
-        const result = await this.taskService.createTask({
-          ...aiResponse.task_data,
-          userId
-        });
+      // if (aiResponse.action === 'create_task' && aiResponse.taskData) {
+      //   let result = await this.taskService.create({
+      //     ...aiResponse.taskData,
+      //     userId
+      //   });
 
-        if (result.hasConflicts) {
-          const suggestions = this.conflictService.suggestAlternativeTimes(
-            result.proposedTask.start_date,
-            result.proposedTask.duration,
-            existingTasks
-          );
+      // if (result.hasConflicts) {
+      //   const suggestions = this.conflictService.suggestAlternativeTimes(
+      //     result.proposedTask.startDate,
+      //     result.proposedTask.duration,
+      //     existingTasks
+      //   );
 
-          responseData = {
-            action: 'conflict_resolution',
-            message: `I found a scheduling conflict! You have "${result.conflicts[0].title}" at 
-            that time. Would you like me to suggest alternative times?`,
-            conflicts: result.conflicts,
-            proposedTask: result.proposedTask,
-            suggestions: suggestions.map(s => s.description)
-          };
-        } else {
-          responseData.taskTreated = result.task;
-        }
-      }
+      //   responseData = {
+      //     action: 'conflict_resolution',
+      //     message: `I found a scheduling conflict! You have "${result.conflicts[0].title}" at
+      //   that time. Would you like me to suggest alternative times?`,
+      //     conflicts: result.conflicts,
+      //     proposedTask: result.proposedTask,
+      //     suggestions: suggestions.map(s => s.description)
+      //   };
+      // } else {
+      // // Ensure we're storing a plain object, not a Task instance
+      //   responseData.taskTreated = result.task || result;
+      // }
+      // }
 
       if (aiResponse.action === 'update_task') {
         const task = await this.taskService.findTaskByIdentifier(
@@ -70,7 +76,7 @@ class ChatController {
           const updatedTask = await this.taskService.updateTask(
             userId,
             task.id,
-            aiResponse.task_data
+            aiResponse.taskData
           );
           responseData.taskUpdated = updatedTask;
         } else {
@@ -78,20 +84,44 @@ class ChatController {
         }
       }
 
+      // Convert any Task instances to plain objects before saving
+      const sanitizedResponseData = this.sanitizeForFirestore(responseData);
+
       // Save assistant response
       await this.conversationService.saveConversation({
         userId,
-        message: responseData.message,
+        message: aiResponse.message,
         type: 'assistant',
-        data: responseData
+        data: responseData.taskData
       });
-
-      res.json(successResponse(responseData, 'Message processed successfully'));
+      const suggestions = aiResponse.suggestions;
+      res.json( { suggestions ,...successResponse(sanitizedResponseData, aiResponse.message) } );
 
     } catch (error) {
       console.error('Chat processing error:', error);
       res.status(500).json(errorResponse('Failed to process message', error.message));
     }
+  }
+
+  // Helper method to sanitize data for Firestore
+  sanitizeForFirestore(data) {
+    if (data instanceof Task) {
+      return data.toJSON();
+    }
+
+    if (Array.isArray(data)) {
+      return data.map(item => this.sanitizeForFirestore(item));
+    }
+
+    if (data && typeof data === 'object') {
+      const sanitized = {};
+      for (const [key, value] of Object.entries(data)) {
+        sanitized[key] = this.sanitizeForFirestore(value);
+      }
+      return sanitized;
+    }
+
+    return data;
   }
 
   async resolveConflict(req, res) {

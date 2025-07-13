@@ -4,10 +4,19 @@ import { getFirestore } from 'firebase-admin/firestore';
 import config from './environment.js';
 class Database {
   constructor() {
-    this.db = null;
-    this.initialized = false;
-  }
+    if (Database._instance) {
+      return Database._instance; // Return existing instance
+    }
 
+    this.db = null; // Initialize your DB connection here
+    Database._instance = this;
+  }
+  static getInstance() {
+    if (!Database._instance) {
+      Database._instance = new Database();
+    }
+    return Database._instance;
+  }
   async initialize() {
     if (this.initialized) return this.db;
 

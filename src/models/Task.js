@@ -1,6 +1,7 @@
 class Task {
   constructor(data = {}) {
     this.id = data.id || '';
+    this.userId = data.userId || '';
     this.title = data.title || '';
     this.description = data.description || '';
     this.category = data.category || 'Personal';
@@ -24,8 +25,8 @@ class Task {
       isShared: false,
       sharedWith: []
     };
-    this.createdAt = data.created_at || new Date().toISOString();
-    this.updatedAt = data.updated_at || new Date().toISOString();
+    this.createdAt = data.createdAt || new Date().toISOString();
+    this.updatedAt = data.updatedAt || new Date().toISOString();
   }
 
   validate() {
@@ -37,10 +38,6 @@ class Task {
 
     if (!this.userId) {
       errors.push('User ID is required');
-    }
-
-    if (!['Personal', 'Work', 'Health', 'Education', 'Shopping', 'Travel', 'Entertainment'].includes(this.category)) {
-      errors.push('Invalid category');
     }
 
     if (!['Low', 'Medium', 'High', 'Urgent'].includes(this.priority)) {
@@ -65,8 +62,8 @@ class Task {
       recurrence: this.recurrence,
       reminders: this.reminders,
       collaboration: this.collaboration,
-      createdAt: this.created_at,
-      updatedAt: this.updated_at
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
     };
   }
 }

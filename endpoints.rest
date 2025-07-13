@@ -1,0 +1,20 @@
+### POST /api/chat - Process chat message
+POST http://localhost:3000/api/chat
+Content-Type: application/json
+
+{
+  "message": "create a daily routine for me, i want to practice leetcode, do exercise and work on my personal project",
+  "userId": "UN0fqemVYbZ3rn2BymL6yU0yb2I3"
+}
+###
+
+### POST /api/chat/resolve-conflict - Resolve scheduling conflicts
+POST http://localhost:3000/api/chat/resolve-conflict
+Content-Type: application/json
+
+{
+  "action": "reschedule",
+  "taskId": "task456",
+  "newTime": "2025-07-20T14:00:00Z",
+  "userId": "user123"
+}

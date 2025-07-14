@@ -2,12 +2,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import config from './environment.js';
 class GeminiClient {
   constructor() {
+    if (GeminiClient._instance) {
+      return GeminiClient._instance; // Return existing instance
+    }
     this.client = null;
     this.model = null;
     this.initialized = false;
-    if (!GeminiClient._instance) {
-      return GeminiClient._instance; // Return existing instance
-    }
     GeminiClient._instance = this;
   }
   static getInstance() {
@@ -21,7 +21,7 @@ class GeminiClient {
 
     try {
       this.client = new GoogleGenerativeAI(config.gemini.apiKey);
-      this.model = this.client.getGenerativeModel({ model: 'gemini-1.5-pro' });
+      this.model = this.client.getGenerativeModel({ model: 'gemini-1.5-flash' });
       this.initialized = true;
       return this.model;
     } catch (error) {

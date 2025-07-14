@@ -33,43 +33,11 @@ class ChatController {
       // Process with AI
       const aiResponse = await this.aiService.parseUserInput(message, existingTasks);
       const responseData = { ...aiResponse.taskData };
-      //improve tasks
-      if (!responseData || !Array.isArray(responseData)) {
-        aiResponse.taskData = await this.aiService.improveTasks(aiResponse.taskData);
-      }
-
-      // Handle different actions
-      // if (aiResponse.action === 'create_task' && aiResponse.taskData) {
-      //   let result = await this.taskService.create({
-      //     ...aiResponse.taskData,
-      //     userId
-      //   });
-
-      // if (result.hasConflicts) {
-      //   const suggestions = this.conflictService.suggestAlternativeTimes(
-      //     result.proposedTask.startDate,
-      //     result.proposedTask.duration,
-      //     existingTasks
-      //   );
-
-      //   responseData = {
-      //     action: 'conflict_resolution',
-      //     message: `I found a scheduling conflict! You have "${result.conflicts[0].title}" at
-      //   that time. Would you like me to suggest alternative times?`,
-      //     conflicts: result.conflicts,
-      //     proposedTask: result.proposedTask,
-      //     suggestions: suggestions.map(s => s.description)
-      //   };
-      // } else {
-      // // Ensure we're storing a plain object, not a Task instance
-      //   responseData.taskTreated = result.task || result;
-      // }
-      // }
 
       if (aiResponse.action === 'update_task') {
         const task = await this.taskService.findTaskByIdentifier(
           userId,
-          aiResponse.task_id || aiResponse.task_identifier
+          aiResponse.taskID || aiResponse.taskIDentifier
         );
 
         if (task) {

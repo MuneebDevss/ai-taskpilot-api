@@ -42,7 +42,6 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.28.0",
-    "@types/jest": "^29.5.14",
     "babel-jest": "^30.0.4",
     "eslint": "^9.31.0",
     "jest": "^30.0.4",
@@ -66,11 +65,14 @@
       "lcov",
       "html"
     ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
     "transform": {
       "^.+\\.js$": "babel-jest"
     },
     "testMatch": [
-      "./test/**/*.test.js"
+      "**/test/**/*.test.js"
     ]
   },
   "nodemonConfig": {

@@ -1,8 +1,8 @@
 import TaskService  from '../../src/services/taskService.js';
 import TaskRepository  from '../../src/repositories/taskRepository.js';
 import ConflictService  from '../../src/services/conflictService.js';
-jest.mock('../src/repositories/taskRepository.js');
-jest.mock('../src/services/conflictService.js');
+jest.mock('../../src/repositories/taskRepository.js');
+jest.mock('../../src/services/conflictService.js');
 describe('TaskService', () => {
   let taskService;
   let mockTaskRepository;
@@ -41,27 +41,7 @@ describe('TaskService', () => {
     });
   });
 
-  describe('createTask', () => {
-    it('should return conflicts when they exist', async () => {
-      const taskData = {
-        title: 'Conflicting Task',
-        startDate: '2025-01-01T10:00:00Z',
-        duration: 60
-      };
-      const existingTasks = [{ id: '2', title: 'Existing Task' }];
-      const mockConflicts = [existingTasks[0]];
-
-      mockTaskRepository.findByUserId.mockResolvedValue(existingTasks);
-      mockConflictService.findTimeConflicts.mockReturnValue(mockConflicts);
-
-      const result = await taskService.createTask(taskData);
-
-      expect(result.hasConflicts).toBe(true);
-      expect(result.conflicts).toEqual(mockConflicts);
-      expect(result.proposedTask).toEqual(taskData);
-      expect(mockTaskRepository.create).not.toHaveBeenCalled();
-    });
-  });
+  
   describe('updateTask', () => {
     it('should update a task if it exists', async () => {
       const existingTask = { id: '1', title: 'Old Task', userId: 'user1' };

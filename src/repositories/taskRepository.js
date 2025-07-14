@@ -8,7 +8,6 @@ class TaskRepository {
 
   async findByUserId(userId) {
     try {
-      console.log(userId);
       const db = await Database.getInstance().initialize();
       const tasksRef = db.collection('users').doc(userId).collection(this.collectionName);
       const snapshot = await tasksRef.get();

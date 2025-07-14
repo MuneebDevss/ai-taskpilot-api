@@ -46,7 +46,6 @@ class TaskService {
   }
 
   async updateTask(userId, taskId, updateData) {
-    print(taskId);
     const existingTask = await this.taskRepository.findById(userId, taskId);
     if (!existingTask) {
       throw new Error('Task not found');

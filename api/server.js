@@ -16,7 +16,7 @@ async function setup() {
     logger.info('📋 API Documentation: /api');
     logger.info('🏥 Health Check: /health');
 
-    // Vercel will use this handler
+    // Prepare serverless handler once app is ready
     serverlessHandler = serverless(expressApp);
   } catch (error) {
     logger.error('Failed to initialize server:', error);
@@ -24,12 +24,13 @@ async function setup() {
   }
 }
 
-// Run setup immediately
+// Run setup on cold start
 await setup();
 
+// Exported Lambda/Vercel handler
 export const handler = async (event, context) => {
   if (!serverlessHandler) {
-    await setup(); // fallback in case handler wasn't initialized
+    await setup(); // fallback for unexpected hot-start failures
   }
   return serverlessHandler(event, context);
 };

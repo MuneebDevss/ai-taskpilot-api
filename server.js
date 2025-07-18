@@ -1,6 +1,6 @@
-import App from './src/app.js';
-import logger from './src/utils/logger.js';
-import config from './src/config/environment.js';
+import App from './api/app.js';
+import logger from './api/utils/logger.js';
+import config from './api/config/environment.js';
 
 async function startServer() {
   try {
@@ -9,7 +9,7 @@ async function startServer() {
 
     const expressApp = app.getExpressApp();
 
-    const server = expressApp.listen(config.port, () => {
+    const server = expressApp.listen(config.port,'0.0.0.0', () => {
       logger.info(`🚀 AI Task Manager API running on port ${config.port}`);
       logger.info(`📝 Environment: ${config.nodeEnv}`);
       logger.info(`📋 API Documentation: http://localhost:${config.port}/api`);

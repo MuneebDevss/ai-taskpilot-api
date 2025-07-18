@@ -34,24 +34,6 @@ class ChatController {
       const aiResponse = await this.aiService.parseUserInput(message, existingTasks);
       const responseData = { ...aiResponse.taskData };
 
-      if (aiResponse.action === 'update_task') {
-        const task = await this.taskService.findTaskByIdentifier(
-          userId,
-          aiResponse.taskID || aiResponse.taskIDentifier
-        );
-
-        if (task) {
-          const updatedTask = await this.taskService.updateTask(
-            userId,
-            task.id,
-            aiResponse.taskData
-          );
-          responseData.taskUpdated = updatedTask;
-        } else {
-          responseData.message = 'I couldn\'t find the task you\'re referring to. Could you be more specific?';
-        }
-      }
-
       // Convert any Task instances to plain objects before saving
       const sanitizedResponseData = this.sanitizeForFirestore(responseData);
 
@@ -63,7 +45,8 @@ class ChatController {
         data: responseData.taskData
       });
       const suggestions = aiResponse.suggestions;
-      res.json( { suggestions ,...successResponse(sanitizedResponseData, aiResponse.message) } );
+      const action = aiResponse.action;
+      res.json( { suggestions, action,...successResponse(sanitizedResponseData, aiResponse.message) } );
 
     } catch (error) {
       console.error('Chat processing error:', error);

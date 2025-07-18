@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+
 /* eslint-disable camelcase */
 const config = {
   port: process.env.PORT || 3000,

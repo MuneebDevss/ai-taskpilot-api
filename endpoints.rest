@@ -3,7 +3,7 @@ POST http://localhost:3000/api/chat
 Content-Type: application/json
 
 {
-  "message": "create a daily routine for me, i want to practice leetcode, do exercise and work on my personal project",
+  "message": "I want to practice, leetcode practice, want to exercise, build an todo-app specially want to go through the sprints, and want some exercise in a day, I wake up at 11 am and sleep by 2 am",
   "userId": "UN0fqemVYbZ3rn2BymL6yU0yb2I3"
 }
 ###

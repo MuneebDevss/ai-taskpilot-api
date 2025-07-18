@@ -49,6 +49,8 @@ class AIService {
         [
           'task title here',
           'task description here',
+          'category'
+          'priority'
           'startDate:endDate(ISO 8601 date string)',
           'recurrence None|Daily|Weekly|Monthly|Yearly'
         ]

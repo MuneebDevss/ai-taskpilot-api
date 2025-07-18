@@ -1,6 +1,6 @@
-import App from './api/app.js';
-import logger from './api/utils/logger.js';
-import config from './api/config/environment.js';
+import App from '../src/app.js';
+import logger from '../src/utils/logger.js';
+import config from '../src/config/environment.js';
 
 async function startServer() {
   try {

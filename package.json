@@ -37,6 +37,7 @@
     "firebase-admin": "^12.6.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
+    "serverless-http": "^3.2.0",
     "winston": "^3.15.0"
   },
   "devDependencies": {

@@ -55,10 +55,10 @@ class App {
         return !ip || ip === '::1' || ip === '127.0.0.1' || process.env.NODE_ENV === 'development';
       }
     });
-    this.app.use('/api/', limiter);
+    // this.app.use('/api/', limiter);
 
-    this.app.use(express.json({ limit: '10mb' }));
-    this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
 
     this.app.use(compression());
     this.app.use(optionalAuth);

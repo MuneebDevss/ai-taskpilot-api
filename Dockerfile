@@ -10,7 +10,7 @@ RUN npm ci --only=production
 
 # Copy application code
 COPY src/ ./src/
-COPY server.js ./
+COPY api/server.js ./
 
 # Create logs directory
 RUN mkdir -p logs

@@ -14,8 +14,7 @@ import config from './config/environment.js';
 import logger from './utils/logger.js';
 import GeminiClient from './config/gemini.js';
 import Database from './config/database.js';
-const geminiClient = GeminiClient.getInstance();
-const database = Database.getInstance();
+
 class App {
   constructor() {
     this.app = express();
@@ -25,7 +24,13 @@ class App {
   }
 
   setupMiddleware() {
-    this.app.use(helmet());
+    // Trust proxy for serverless environments (Vercel, AWS Lambda, etc.)
+    this.app.set('trust proxy', true);
+    
+    this.app.use(helmet({
+      contentSecurityPolicy: false, // Disable CSP for serverless
+    }));
+    
     this.app.use(cors({
       origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
       credentials: true
@@ -36,7 +41,21 @@ class App {
       max: 100,
       message: 'Too many requests from this IP, please try again later.',
       standardHeaders: true,
-      legacyHeaders: false
+      legacyHeaders: false,
+      // Custom key generator for serverless environments
+      keyGenerator: (req) => {
+        // Try multiple sources for IP address
+        return req.ip || 
+               req.connection?.remoteAddress || 
+               req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+               req.headers['x-real-ip'] ||
+               'unknown';
+      },
+      // Skip rate limiting in development or if IP can't be determined
+      skip: (req) => {
+        const ip = req.ip || req.connection?.remoteAddress;
+        return !ip || ip === '::1' || ip === '127.0.0.1' || process.env.NODE_ENV === 'development';
+      }
     });
     this.app.use('/api/', limiter);
 
@@ -62,7 +81,8 @@ class App {
         status: 'OK',
         timestamp: new Date().toISOString(),
         version: process.env.npm_package_version || '1.0.0',
-        environment: config.nodeEnv
+        environment: config.nodeEnv,
+        initialized: true
       });
     });
 
@@ -86,6 +106,16 @@ class App {
         }
       });
     });
+
+    // Remove the debug console.log in production
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Muneeb');
+      this.app._router.stack.forEach((middleware) => {
+        if (middleware.route) {
+          console.log('Route:', middleware.route.path);
+        }
+      });
+    }
   }
 
   setupErrorHandling() {
@@ -95,12 +125,41 @@ class App {
 
   async initialize() {
     try {
-      await database.initialize();
-      geminiClient.initialize();
-      logger.info('Application initialized successfully');
+      logger.info('🔄 Starting application initialization...');
+      
+      // Add timeout wrapper
+      const withTimeout = (promise, timeoutMs, name) => {
+        return Promise.race([
+          promise,
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error(`${name} timeout after ${timeoutMs}ms`)), timeoutMs)
+          )
+        ]);
+      };
+
+      // Initialize database with timeout
+      const database = Database.getInstance();
+      await withTimeout(
+        database.initialize(), 
+        15000, 
+        'Database initialization'
+      );
+      logger.info('✅ Database initialized');
+
+      // Initialize Gemini client with timeout
+      const geminiClient = GeminiClient.getInstance();
+      await withTimeout(
+        Promise.resolve(geminiClient.initialize()), 
+        10000, 
+        'Gemini client initialization'
+      );
+      logger.info('✅ Gemini client initialized');
+
+      logger.info('✅ Application initialized successfully');
     } catch (error) {
-      logger.error('Failed to initialize application:', error);
-      process.exit(1);
+      logger.error('❌ Failed to initialize application:', error);
+      // In serverless, don't exit the process - just throw the error
+      throw error;
     }
   }
 

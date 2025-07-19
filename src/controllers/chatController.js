@@ -28,10 +28,9 @@ class ChatController {
       });
 
       // Get existing tasks for context
-      const existingTasks = await this.taskService.getAllTasks(userId);
 
       // Process with AI
-      const aiResponse = await this.aiService.parseUserInput(message, existingTasks);
+      const aiResponse = await this.aiService.parseUserInput(message, []);
       const responseData = { ...aiResponse.taskData };
 
       // Convert any Task instances to plain objects before saving

@@ -12,7 +12,7 @@ let initializationPromise = null;
 const withTimeout = (promise, timeoutMs, operation = 'Operation') => {
   return Promise.race([
     promise,
-    new Promise((_, reject) => 
+    new Promise((_, reject) =>
       setTimeout(() => reject(new Error(`${operation} timeout after ${timeoutMs}ms`)), timeoutMs)
     )
   ]);
@@ -34,10 +34,8 @@ async function setup() {
       logger.info('🔄 Initializing serverless function...');
 
       const app = new App();
-      
       // Add timeout to initialization - most serverless platforms have 30s limit
       await withTimeout(app.initialize(), 25000, 'App initialization');
-      
       const expressApp = app.getExpressApp();
 
       logger.info('🚀 AI Task Manager API ready');
@@ -55,7 +53,6 @@ async function setup() {
           }
         }
       });
-      
       isInitialized = true;
       return serverlessHandler;
     } catch (error) {
@@ -76,18 +73,16 @@ export const handler = async (event, context) => {
   if (context) {
     context.callbackWaitsForEmptyEventLoop = false;
   }
-  
   try {
     // Ensure initialization is complete
     const handlerFn = await withTimeout(setup(), 25000, 'Server setup');
 
     // Execute the request with timeout
     const result = await withTimeout(
-      handlerFn(event, context), 
-      25000, 
+      handlerFn(event, context),
+      25000,
       'Request processing'
     );
-    
     return result;
   } catch (error) {
     logger.error('❌ Handler error:', error);
@@ -129,16 +124,13 @@ export default async (req, res) => {
 
   try {
     const result = await handler(event, context);
-    
     // Convert Lambda response back to Vercel response
     if (result.headers) {
       Object.entries(result.headers).forEach(([key, value]) => {
         res.setHeader(key, value);
       });
     }
-    
     res.status(result.statusCode || 200);
-    
     if (result.body) {
       const body = typeof result.body === 'string' ? result.body : JSON.stringify(result.body);
       res.send(body);

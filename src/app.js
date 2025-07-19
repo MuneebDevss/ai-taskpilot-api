@@ -26,11 +26,9 @@ class App {
   setupMiddleware() {
     // Trust proxy for serverless environments (Vercel, AWS Lambda, etc.)
     this.app.set('trust proxy', true);
-    
     this.app.use(helmet({
-      contentSecurityPolicy: false, // Disable CSP for serverless
+      contentSecurityPolicy: false// Disable CSP for serverless
     }));
-    
     this.app.use(cors({
       origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
       credentials: true
@@ -45,8 +43,8 @@ class App {
       // Custom key generator for serverless environments
       keyGenerator: (req) => {
         // Try multiple sources for IP address
-        return req.ip || 
-               req.connection?.remoteAddress || 
+        return req.ip ||
+               req.connection?.remoteAddress ||
                req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
                req.headers['x-real-ip'] ||
                'unknown';
@@ -86,9 +84,9 @@ class App {
       });
     });
 
-    this.app.use('/api/tasks', taskRoutes);
-    this.app.use('/api/chat', chatRoutes);
-    this.app.use('/api/conversations', conversationRoutes);
+    this.app.use('/tasks', taskRoutes);
+    this.app.use('/chat', chatRoutes);
+    this.app.use('/conversations', conversationRoutes);
 
     this.app.get('/api', (req, res) => {
       res.json({
@@ -106,16 +104,6 @@ class App {
         }
       });
     });
-
-    // Remove the debug console.log in production
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Muneeb');
-      this.app._router.stack.forEach((middleware) => {
-        if (middleware.route) {
-          console.log('Route:', middleware.route.path);
-        }
-      });
-    }
   }
 
   setupErrorHandling() {
@@ -126,12 +114,11 @@ class App {
   async initialize() {
     try {
       logger.info('🔄 Starting application initialization...');
-      
       // Add timeout wrapper
       const withTimeout = (promise, timeoutMs, name) => {
         return Promise.race([
           promise,
-          new Promise((_, reject) => 
+          new Promise((_, reject) =>
             setTimeout(() => reject(new Error(`${name} timeout after ${timeoutMs}ms`)), timeoutMs)
           )
         ]);
@@ -140,8 +127,8 @@ class App {
       // Initialize database with timeout
       const database = Database.getInstance();
       await withTimeout(
-        database.initialize(), 
-        15000, 
+        database.initialize(),
+        15000,
         'Database initialization'
       );
       logger.info('✅ Database initialized');
@@ -149,8 +136,8 @@ class App {
       // Initialize Gemini client with timeout
       const geminiClient = GeminiClient.getInstance();
       await withTimeout(
-        Promise.resolve(geminiClient.initialize()), 
-        10000, 
+        Promise.resolve(geminiClient.initialize()),
+        10000,
         'Gemini client initialization'
       );
       logger.info('✅ Gemini client initialized');

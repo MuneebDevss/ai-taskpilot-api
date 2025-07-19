@@ -78,11 +78,16 @@ export const handler = async (event, context) => {
     const handlerFn = await withTimeout(setup(), 25000, 'Server setup');
 
     // Execute the request with timeout
+    console.log('About to call serverless handler...');
     const result = await withTimeout(
       handlerFn(event, context),
       25000,
       'Request processing'
     );
+    console.log('Serverless handler result:', JSON.stringify(result, null, 2));
+    console.log('Result type:', typeof result);
+    console.log('Result keys:', Object.keys(result || {}));
+    
     return result;
   } catch (error) {
     logger.error('❌ Handler error:', error);
@@ -108,6 +113,7 @@ export const handler = async (event, context) => {
 // For local development with Vercel CLI
 export default async (req, res) => {
   // Convert Vercel request/response to Lambda-like event/context
+  
   const event = {
     httpMethod: req.method,
     path: req.url,

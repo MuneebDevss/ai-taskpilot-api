@@ -1,4 +1,5 @@
 # .dockerignore
+
 node_modules
 npm-debug.log
 .git
@@ -8,6 +9,6 @@ README.md
 .nyc_output
 coverage
 .parcel-cache
-logs
+*.log
 tests
 Implicit keys need to be on a single lineYAML

@@ -49,10 +49,10 @@ class AIService {
         [
           'task title here',
           'task description here',
-          'category'
-          'priority'
           'startDate:endDate(ISO 8601 date string)',
           'recurrence None|Daily|Weekly|Monthly|Yearly'
+          'priority'
+          'category'
         ]
       ]
         
@@ -61,8 +61,11 @@ class AIService {
         - "taskData": array of task objects (Using the simplified structure above. This is the core schedule.)
         - "message": friendly, encouraging, and detailed response to user (This is where the creativity shines. 
         Acknowledge the user's goals, explain the schedule, and offer flexibility.)
-        - "suggestions": array of helpful and proactive suggestions (e.g., "Would you like to refine any durations?", 
-        "Consider adding a buffer time," "Do you prefer a different order?")
+        - "suggestions": array of actionable user prompts (e.g., 
+            "Refine the durations of the tasks.", 
+            "Add a buffer time between tasks.", 
+            "Change the order of the tasks."
+          )
         - "hasConflicts": boolean (Indicates if any proposed tasks had to be adjusted due to overlaps.)
 
     Date Parsing Guidelines:

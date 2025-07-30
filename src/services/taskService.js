@@ -70,5 +70,9 @@ class TaskService {
       task.title.toLowerCase().includes(identifier.toLowerCase())
     );
   }
+
+  async findTasksByStartDate(userId, startDate) {
+    return await this.taskRepository.findByStartDate(userId, startDate);
+  }
 }
 export default TaskService;

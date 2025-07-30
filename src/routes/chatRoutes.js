@@ -11,4 +11,7 @@ router.post('/', validateChatMessage, chatController.processMessage.bind(chatCon
 // POST /api/chat/resolve-conflict - Resolve scheduling conflicts
 router.post('/resolve-conflict', chatController.resolveConflict.bind(chatController));
 
+// POST /api/chat/plan-today - Plan today using existing and current tasks
+router.post('/plan-today', chatController.planTodayWithExistingTasks.bind(chatController));
+
 export default router;

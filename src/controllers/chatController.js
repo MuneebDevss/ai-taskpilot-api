@@ -2,7 +2,6 @@ import AIService from '../services/aiService.js';
 import TaskService from '../services/taskService.js';
 import ConversationService from '../services/conversationService.js';
 import ConflictService from '../services/conflictService.js';
-import Task from '../models/Task.js';
 import { successResponse, errorResponse } from '../utils/responseFormatter.js';
 class ChatController {
   constructor() {
@@ -14,56 +13,52 @@ class ChatController {
 
   async processMessage(req, res) {
     try {
-      const { message, userId = 'default' } = req.body;
+      const { message, userId = 'default', intent, tasks } = req.body;
 
       if (!message?.trim()) {
         return res.status(400).json(errorResponse('Message is required'));
       }
 
-      // Save user message
-      await this.conversationService.saveConversation({
-        userId,
-        message,
-        type: 'user'
-      });
-
-      // Get existing tasks for context
-      const existingTasks = await this.taskService.getAllTasks(userId);
-
-      // Process with AI
-      const aiResponse = await this.aiService.parseUserInput(message, existingTasks);
-      const responseData = { ...aiResponse.taskData };
-
-      if (aiResponse.action === 'update_task') {
-        const task = await this.taskService.findTaskByIdentifier(
-          userId,
-          aiResponse.taskID || aiResponse.taskIDentifier
-        );
-
-        if (task) {
-          const updatedTask = await this.taskService.updateTask(
-            userId,
-            task.id,
-            aiResponse.taskData
-          );
-          responseData.taskUpdated = updatedTask;
-        } else {
-          responseData.message = 'I couldn\'t find the task you\'re referring to. Could you be more specific?';
-        }
+      if (!intent) {
+        return res.status(400).json(errorResponse('Intent is required'));
       }
 
-      // Convert any Task instances to plain objects before saving
-      const sanitizedResponseData = this.sanitizeForFirestore(responseData);
+      // Validate intent values
+      const validIntents = ['create_routine', 'improve_routine', 'query'];
+      if (!validIntents.includes(intent)) {
+        return res.status(400).json(errorResponse(`Invalid intent. Must be one of: ${validIntents.join(', ')}`));
+      }
 
-      // Save assistant response
-      await this.conversationService.saveConversation({
-        userId,
-        message: aiResponse.message,
-        type: 'assistant',
-        data: responseData.taskData
+      let aiResponse;
+
+      // Process based on intent
+      switch (intent) {
+      case 'create_routine':
+        aiResponse = await this.aiService.parseUserInput(message, tasks || []);
+        break;
+
+      case 'improve_routine':
+        aiResponse = await this.aiService.parseUserInput(message, tasks || []);
+        break;
+      case 'query':
+        aiResponse = await this.aiService.planToday(message, tasks || [], userId);
+        break;
+
+      default:
+        return res.status(400).json(errorResponse('Invalid intent provided'));
+      }
+      // Check if AI service returned an error
+      if (aiResponse.action === 'error') {
+        const statusCode = aiResponse.statusCode || 422;
+        return res.status(statusCode).json(errorResponse(aiResponse.message, aiResponse.suggestions));
+      }
+
+      const suggestions = aiResponse.suggestions || [];
+
+      res.json({
+        suggestions,
+        ...successResponse(aiResponse.taskData, aiResponse.message)
       });
-      const suggestions = aiResponse.suggestions;
-      res.json( { suggestions ,...successResponse(sanitizedResponseData, aiResponse.message) } );
 
     } catch (error) {
       console.error('Chat processing error:', error);
@@ -71,27 +66,36 @@ class ChatController {
     }
   }
 
-  // Helper method to sanitize data for Firestore
-  sanitizeForFirestore(data) {
-    if (data instanceof Task) {
-      return data.toJSON();
-    }
+  async planTodayWithExistingTasks(req, res) {
+    try {
+      const { userId = 'default', existingTasks = [], currentTasks } = req.body;
 
-    if (Array.isArray(data)) {
-      return data.map(item => this.sanitizeForFirestore(item));
-    }
-
-    if (data && typeof data === 'object') {
-      const sanitized = {};
-      for (const [key, value] of Object.entries(data)) {
-        sanitized[key] = this.sanitizeForFirestore(value);
+      if (!Array.isArray(existingTasks)) {
+        return res.status(400).json(errorResponse('existingTasks must be an array'));
       }
-      return sanitized;
-    }
+      if (!Array.isArray(currentTasks)) {
+        return res.status(400).json(errorResponse('currentTasks must be an array'));
+      }
 
-    return data;
+      const aiResponse = await this.aiService.planToday(existingTasks, userId, currentTasks);
+
+      if (aiResponse.action === 'error') {
+        const statusCode = aiResponse.statusCode || 422;
+        return res.status(statusCode).json(errorResponse(aiResponse.message, aiResponse.suggestions));
+      }
+
+      const suggestions = aiResponse.suggestions || [];
+      res.json({
+        suggestions,
+        ...successResponse(aiResponse.taskData, aiResponse.message)
+      });
+    } catch (error) {
+      console.error('PlanTodayWithExistingTasks error:', error);
+      res.status(500).json(errorResponse('Failed to process plan today with existing tasks', error.message));
+    }
   }
 
+  // Helper method to sanitize data for Firestore
   async resolveConflict(req, res) {
     try {
       // const { action, taskId, newTime, userId = 'default' } = req.body;

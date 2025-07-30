@@ -26,8 +26,8 @@ A powerful AI-powered task management API built with Node.js, Express, Firebase,
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/ai-task-manager.git
-   cd ai-task-manager
+   git clone https://github.com/MuneebDevss/ai-taskpilot-api.git
+   cd ai-taskpilot-api
    ```
 
 2. **Install dependencies**

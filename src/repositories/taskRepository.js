@@ -97,6 +97,29 @@ class TaskRepository {
       throw error;
     }
   }
+
+  async findByStartDate(userId, startDate) {
+    try {
+      const db = await Database.getInstance().initialize();
+      const tasksRef = db.collection('users').doc(userId)
+        .collection('tasksByDate').doc(startDate).collection('tasks');
+      const snapshot = await tasksRef.get();
+
+      if (snapshot.empty) {
+        return [];
+      }
+
+      const tasks = [];
+      snapshot.forEach(doc => {
+        tasks.push(new Task({ id: doc.id, ...doc.data() }));
+      });
+
+      return tasks;
+    } catch (error) {
+      console.error('Error fetching tasks by startDate:', error);
+      throw error;
+    }
+  }
 }
 
 export default TaskRepository;

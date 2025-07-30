@@ -4,8 +4,92 @@ Content-Type: application/json
 
 {
   "message": "create a daily routine for me, i want to practice leetcode, do exercise and work on my personal project",
-  "userId": "UN0fqemVYbZ3rn2BymL6yU0yb2I3"
+  "userId": "UN0fqemVYbZ3rn2BymL6yU0yb2I3",
+  'intent': 'create_routine'
 }
+POST http://localhost:3000/api/chat
+Content-Type: application/json
+
+{
+  "message": "create a daily routine for me, i want to practice leetcode, do exercise and work on my personal project",
+  "userId": "UN0fqemVYbZ3rn2BymL6yU0yb2I3",
+  "intent": "plan_today",
+  "tasks": [
+    {
+      "title": "Morning Routine",
+      "description": "Wake up, drink water, light stretching",
+      "dateRange": "2025-07-31T07:00:00Z/2025-07-31T07:30:00Z",
+      "recurrence": "Daily",
+      "priority": "low",
+      "category": "Personal Care"
+    },
+    {
+      "title": "LeetCode Practice",
+      "description": "Solve 2 LeetCode problems, focus on algorithms and data structures",
+      "dateRange": "2025-07-31T07:30:00Z/2025-07-31T09:00:00Z",
+      "recurrence": "Daily",
+      "priority": "high",
+      "category": "Learning"
+    },
+    {
+      "title": "Exercise",
+      "description": "30 minutes of cardio and strength training",
+      "dateRange": "2025-07-31T09:00:00Z/2025-07-31T09:30:00Z",
+      "recurrence": "Daily",
+      "priority": "medium",
+      "category": "Fitness"
+    },
+    {
+      "title": "Break",
+      "description": "Quick snack and hydration",
+      "dateRange": "2025-07-31T09:30:00Z/2025-07-31T09:45:00Z",
+      "recurrence": "Daily",
+      "priority": "low",
+      "category": "Personal Care"
+    },
+    {
+      "title": "Personal Project Work",
+      "description": "Focus on the core functionality of your project; aim for progress, not perfection",
+      "dateRange": "2025-07-31T09:45:00Z/2025-07-31T12:45:00Z",
+      "recurrence": "Daily",
+      "priority": "high",
+      "category": "Project"
+    },
+    {
+      "title": "Lunch Break",
+      "description": "Nourishing meal and mindful eating",
+      "dateRange": "2025-07-31T12:45:00Z/2025-07-31T13:45:00Z",
+      "recurrence": "Daily",
+      "priority": "low",
+      "category": "Personal Care"
+    },
+    {
+      "title": "Afternoon Project Work",
+      "description": "Refine and test the functionality, address any bugs",
+      "dateRange": "2025-07-31T13:45:00Z/2025-07-31T16:45:00Z",
+      "recurrence": "Daily",
+      "priority": "high",
+      "category": "Project"
+    },
+    {
+      "title": "Break",
+      "description": "Short walk or relaxation",
+      "dateRange": "2025-07-31T16:45:00Z/2025-07-31T17:00:00Z",
+      "recurrence": "Daily",
+      "priority": "low",
+      "category": "Personal Care"
+    },
+    {
+      "title": "Evening Wind-Down",
+      "description": "Prepare dinner, read a book, relax",
+      "dateRange": "2025-07-31T17:00:00Z/2025-07-31T22:00:00Z",
+      "recurrence": "Daily",
+      "priority": "low",
+      "category": "Personal Care"
+    }
+  ]
+}
+
 ###
 
 ### POST /api/chat/resolve-conflict - Resolve scheduling conflicts

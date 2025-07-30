@@ -102,7 +102,6 @@ firebase-debug.log
 firebase-debug.*.log
 .firebase/
 
-
 # Documentation
 docs/generated/
 .vercel

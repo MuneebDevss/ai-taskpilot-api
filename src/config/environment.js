@@ -1,3 +1,8 @@
+
+if (process.env.NODE_ENV !== 'production') {
+  const dotenv = await import('dotenv');
+  dotenv.config();
+}
 /* eslint-disable camelcase */
 const config = {
   port: process.env.PORT || 3000,
